@@ -12,7 +12,8 @@ const CreatePost = () => {
     photo: '',
   });
 
-  const post_Url = "imagetotextbackend-production.up.railway.app";
+  // const post_Url = "imagetotextbackend-production.up.railway.app";
+  const post_Url = "https://divinestudio.pro";
 
   const [generatingImg, setGeneratingImg] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ const CreatePost = () => {
 
       try {
         setGeneratingImg(true);
-        const response = await fetch(`https://${post_Url}/api/v1/imgGenerate`, {
+        const response = await fetch(`${post_Url}/api/v1/imgGenerate`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_STABILITY_AI_TOKEN}`,
@@ -67,7 +68,7 @@ const CreatePost = () => {
     if (form.prompt && form.photo) {
       try {
         setLoading(true);
-        const response = await fetch(`https://${post_Url}/api/v1/post`, {
+        const response = await fetch(`${post_Url}/api/v1/post`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form),

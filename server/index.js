@@ -8,7 +8,11 @@ import imgGenerateRoutes from "./routes/imgGenerateRoutes.js";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://divinestudio.pro', // or your frontend URL
+  methods: 'GET,POST,PUT,DELETE',
+  allowedHeaders: 'Content-Type,Authorization'
+}));
 app.use(express.json({ limit: "50mb" }));
 
 app.use("/api/v1/post", postRoutes);
@@ -21,8 +25,8 @@ app.get("/", async (req, res) => {
 const startServer = async () => {
     try {
         connectDB(process.env.MONGODB_URL)
-        app.listen(8000, () =>
-            console.log("Server has started on port http://localhost:8000")
+        app.listen(8001, () =>
+            console.log("Server has started on port http://localhost:8001")
         );
     } catch (error) {
         console.log(error)
