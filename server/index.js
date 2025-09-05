@@ -9,9 +9,9 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: 'https://divinestudio.pro', // or your frontend URL
-  methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization'
+    origin: 'https://divinestudio.pro', // or your frontend URL
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type,Authorization'
 }));
 app.use(express.json({ limit: "50mb" }));
 
@@ -22,15 +22,15 @@ app.get("/", async (req, res) => {
     res.send("Hello there");
 });
 
-const startServer = async () => {
-    try {
-        connectDB(process.env.MONGODB_URL)
-        app.listen(8001, () =>
-            console.log("Server has started on port http://localhost:8001")
-        );
-    } catch (error) {
-        console.log(error)
-    }
-};
+// const startServer = async () => {
+//     try {
+//         connectDB(process.env.MONGODB_URL)
+//         app.listen(8001, () =>
+//             console.log("Server has started on port http://localhost:8001")
+//         );
+//     } catch (error) {
+//         console.log(error)
+//     }
+// };
 
-startServer();
+// startServer();

@@ -14,7 +14,7 @@ router.route("/").post(async (req, res) => {
     try {
         const { prompt } = req.body;
         // const stabilityaiApiKey = process.env.STABILITY_AI_TOKEN;
-        const stabilityaiApiKey = "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";
+        const stabilityaiApiKey = "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";
 
         const response = await fetch(
             "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
