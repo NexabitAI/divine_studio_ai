@@ -1,48 +1,48 @@
 import express from "express";
-import * as dotenv from "dotenv";
 import fetch from "node-fetch";
-
-dotenv.config();
 
 const router = express.Router();
 
+const HUGGINGFACE_TOKEN = "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";
+const MODEL_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
+
 router.route("/").get((req, res) => {
-    res.send("Hello from Hugging Face");
+    res.send("Hello from Hugging Face Image API");
 });
 
 router.route("/").post(async (req, res) => {
     try {
         const { prompt } = req.body;
-        // const stabilityaiApiKey = process.env.STABILITY_AI_TOKEN;
-        const stabilityaiApiKey = "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";
-
-        const response = await fetch(
-            "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
-            // "https://api-inference.huggingface.co/models/ZB-Tech/Text-to-Image",
-            {
-                headers: {
-                    Authorization: `Bearer ${stabilityaiApiKey}`,
-                    "Content-Type": "application/json",
-                },
-                method: "POST",
-                body: JSON.stringify({ inputs: prompt }),
-            }
-        );
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Hugging Face API error: ${errorText}`);
+        if (!prompt) {
+            return res.status(400).json({ error: "Missing prompt" });
         }
 
-        const buffer = await response.buffer();
-        const image = buffer.toString("base64");
+        const response = await fetch(MODEL_URL, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${HUGGINGFACE_TOKEN}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ inputs: prompt }),
+        });
 
-        res.status(200).json({ photo: image });
+        const contentType = response.headers.get("content-type");
+
+        // If Hugging Face returned an error in JSON
+        if (contentType && contentType.includes("application/json")) {
+            const errorJson = await response.json();
+            console.error("Hugging Face JSON error:", errorJson);
+            return res.status(500).json(errorJson);
+        }
+
+        // Otherwise assume image bytes
+        const buffer = await response.buffer();
+        const base64Image = buffer.toString("base64");
+        res.status(200).json({ photo: base64Image });
     } catch (error) {
-        console.error("Error generating image:", error.message);
-        res.status(500).send("Something went wrong");
+        console.error("Server error:", error);
+        res.status(500).json({ error: error.message });
     }
 });
 
 export default router;
-
