@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import {
   ClerkProvider,
@@ -14,87 +14,6 @@ import { Home, CreatePost } from "./pages";
 
 const PUBLISHABLE_KEY = "pk_live_Y2xlcmsuZGl2aW5lc3R1ZGlvLnBybyQ";
 
-/* ============================ Theme Toggle ============================ */
-const THEME_KEY = "theme"; // 'soft-dark' | 'hc' | null => default (Glassy Dark)
-
-function applyTheme(theme) {
-  const root = document.documentElement;
-  if (theme === "soft-dark" || theme === "hc") {
-    root.setAttribute("data-theme", theme);
-  } else {
-    root.removeAttribute("data-theme");
-  }
-}
-
-const ThemeToggle = () => {
-  const [open, setOpen] = useState(false);
-  const [theme, setTheme] = useState(() => {
-    try {
-      return localStorage.getItem(THEME_KEY) || "";
-    } catch {
-      return "";
-    }
-  });
-
-  useEffect(() => {
-    applyTheme(theme);
-    try {
-      if (theme) localStorage.setItem(THEME_KEY, theme);
-      else localStorage.removeItem(THEME_KEY);
-    } catch {
-      /* ignore */
-    }
-  }, [theme]);
-
-  const options = [
-    { key: "", label: "Glassy Dark", icon: "🌌" },
-    { key: "soft-dark", label: "Soft Dark", icon: "🌙" },
-    { key: "hc", label: "High Contrast", icon: "⚡" },
-  ];
-
-  const active = options.find((o) => o.key === theme) || options[0];
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="chip glass hover:opacity-90 transition animate-in"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        title="Theme"
-      >
-        <span className="text-sm">{active.icon}</span>
-        <span className="text-sm">{active.label}</span>
-      </button>
-
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 mt-2 min-w-44 p-1 glass-strong z-50"
-        >
-          {options.map((o) => (
-            <button
-              key={o.key || "default"}
-              onClick={() => {
-                setTheme(o.key);
-                setOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm hover:bg-white/10 ${
-                theme === o.key ? "elevate" : ""
-              }`}
-              role="menuitem"
-            >
-              <span className="mr-2">{o.icon}</span>
-              {o.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-/* ===================================================================== */
-
 /* ========================= Profile Dropdown ========================== */
 const ProfileDropdown = () => {
   const { user } = useUser();
@@ -102,17 +21,23 @@ const ProfileDropdown = () => {
 
   return (
     <div className="relative">
-      {/* Trigger */}
+      {/* Trigger — fixed height/width to match Create button */}
       <button
         onClick={() => setOpen(!open)}
-        className="chip hover:opacity-90 transition"
+        className="
+          chip hover:opacity-90 transition
+          h-10 min-w-[160px] px-3
+          flex items-center justify-between
+        "
       >
-        <img
-          src={user?.imageUrl}
-          alt="profile"
-          className="w-7 h-7 rounded-full object-cover"
-        />
-        <span className="font-medium">{user?.firstName}</span>
+        <span className="flex items-center gap-2 min-w-0">
+          <img
+            src={user?.imageUrl}
+            alt="profile"
+            className="w-7 h-7 rounded-full object-cover"
+          />
+          <span className="font-medium truncate">{user?.firstName}</span>
+        </span>
         <span aria-hidden>▾</span>
       </button>
 
@@ -138,20 +63,23 @@ const App = () => {
         {/* Header */}
         <header className="sticky top-0 z-40 w-full glass elevate sm:px-8 px-4 py-3">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-3">
+              {/* Bigger logo */}
               <img
                 src={logo2}
                 alt="logo"
-                className="w-10 h-10 object-contain drop-shadow-sm"
+                className="w-14 h-14 object-contain drop-shadow-sm"
               />
               <span className="sr-only">AI Image Studio</span>
             </Link>
 
             <div className="flex items-center gap-3">
-              <ThemeToggle />
-
               <SignedIn>
-                <Link to="/create-post" className="btn btn-accent">
+                {/* Create — same size as profile chip */}
+                <Link
+                  to="/create-post"
+                  className="btn btn-accent h-10 min-w-[160px]"
+                >
                   Create
                 </Link>
                 <ProfileDropdown />
@@ -159,7 +87,7 @@ const App = () => {
 
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className="btn">Sign In</button>
+                  <button className="btn h-10 min-w-[160px]">Sign In</button>
                 </SignInButton>
               </SignedOut>
             </div>
