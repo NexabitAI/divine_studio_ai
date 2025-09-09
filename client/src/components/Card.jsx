@@ -2,29 +2,78 @@ import React from 'react';
 import { download } from '../assets';
 import { downloadImage } from '../utils';
 
-const Card = ({ _id, name, prompt, photo }) => (
-  <div className="rounded-xl group relative shadow-card hover:shadow-cardhover card">
+const Card = ({ _id, name = 'User', prompt = '', photo }) => (
+  <article
+    className="
+      card relative group overflow-hidden rounded-2xl
+      glass elevate transition-transform duration-200 ease-[var(--ease)]
+      hover:-translate-y-1
+    "
+  >
     <img
-      className="w-full h-auto object-cover rounded-xl"
+      className="w-full h-auto object-cover rounded-2xl"
       src={photo}
-      alt={prompt}
+      alt={prompt || 'Generated image'}
+      loading="lazy"
+      decoding="async"
     />
-    <div className="group-hover:flex flex-col max-h-[94.5%] hidden absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-90 m-2 p-4 rounded-md">
-      <p className="text-white text-sm overflow-y-auto prompt">{prompt}</p>
-      <div className="mt-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 flex justify-center items-center bg-green-700 rounded-full text-white text-sm font-semibold">{name[0]}</div>
-          <p className="text-gray-300 text-sm">{name}</p>
+
+    {/* subtle hover ring */}
+    <div
+      className="
+        pointer-events-none absolute inset-0 rounded-2xl
+        ring-1 ring-transparent group-hover:ring-[hsl(var(--accent)/.35)]
+        transition
+      "
+      aria-hidden="true"
+    />
+
+    {/* Overlay (visible on hover or keyboard focus) */}
+    <div
+      className="
+        hidden group-hover:flex group-focus-within:flex
+        flex-col gap-3
+        absolute inset-x-2 bottom-2
+        glass-strong rounded-xl p-4
+        max-h-[85%]
+      "
+    >
+      <p className="text-sm leading-6 overflow-y-auto prompt">
+        {prompt}
+      </p>
+
+      <div className="flex justify-between items-center gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <div
+            className="
+              w-9 h-9 flex justify-center items-center
+              rounded-full text-sm font-semibold
+              bg-[hsl(var(--accent)/.25)] text-[hsl(var(--fg))]
+              border border-[hsl(var(--border)/.45)]
+            "
+            aria-hidden="true"
+          >
+            {(name || 'U').charAt(0).toUpperCase()}
+          </div>
+          <p className="text-sm opacity-90 truncate">{name}</p>
         </div>
-        <button type="button" onClick={() => downloadImage(_id, photo)} className="outline-none bg-transparent border-none">
-          <span className="sr-only">Download Image</span>
-          <img src={download} alt="download" className="w-6 h-6 object-contain invert" />
+
+        <button
+          type="button"
+          onClick={() => downloadImage(_id, photo)}
+          className="btn px-2 py-2"
+          aria-label="Download image"
+        >
+          <img
+            src={download}
+            alt=""
+            className="w-5 h-5 object-contain invert"
+            aria-hidden="true"
+          />
         </button>
       </div>
     </div>
-
-
-  </div>
+  </article>
 );
 
 export default Card;

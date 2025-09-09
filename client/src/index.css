@@ -2,22 +2,248 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-    font-family: "Inter", sans-serif;
+/* -------- Global Font -------- */
+* { font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+
+/* =======================================================================
+   THEME TOKENS (HSL components). Default: Glassy Dark
+   Switch theme by setting data-theme="soft-dark" or data-theme="hc" on <html> or <body>.
+   ======================================================================= */
+:root {
+  color-scheme: dark;
+
+  /* Base palette (Glassy Dark) */
+  --bg: 220 18% 8%;            /* deep navy-ish */
+  --bg-elev: 220 18% 10%;       /* slightly lighter for elevated bg */
+  --surface: 220 18% 14%;       /* glass panel base */
+  --border: 220 20% 40%;
+  --fg: 210 20% 92%;
+  --muted: 210 12% 72%;
+
+  /* Accent: teal (aligns with modern AI palettes) */
+  --accent: 170 70% 45%;
+  --accent-strong: 170 85% 54%;
+  --accent-foreground: 160 10% 8%;
+
+  /* Effects */
+  --glass-alpha: 0.08;
+  --glass-strong-alpha: 0.14;
+  --ring: 170 85% 54%;
+  --shadow: 220 60% 4%;
+
+  /* Motion */
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --dur: 180ms;
 }
 
+/* Soft Dark companion (same hue family, gentler contrast) */
+:root[data-theme="soft-dark"],
+body[data-theme="soft-dark"] {
+  --bg: 220 14% 10%;
+  --bg-elev: 220 14% 12%;
+  --surface: 220 16% 16%;
+  --border: 220 18% 36%;
+  --fg: 210 18% 90%;
+  --muted: 210 10% 70%;
+
+  --accent: 170 60% 46%;
+  --accent-strong: 170 72% 54%;
+  --accent-foreground: 160 12% 8%;
+
+  --glass-alpha: 0.10;
+  --glass-strong-alpha: 0.18;
+  --ring: 170 72% 54%;
+}
+
+/* High-Contrast (AA+ targets, thicker borders/focus) */
+:root[data-theme="hc"],
+body[data-theme="hc"] {
+  --bg: 220 22% 6%;
+  --bg-elev: 220 22% 8%;
+  --surface: 220 22% 12%;
+  --border: 220 24% 60%;
+  --fg: 210 22% 96%;
+  --muted: 210 14% 82%;
+
+  --accent: 170 90% 52%;
+  --accent-strong: 170 95% 60%;
+  --accent-foreground: 160 10% 6%;
+
+  --glass-alpha: 0.16;
+  --glass-strong-alpha: 0.24;
+  --ring: 170 95% 60%;
+}
+
+/* =======================================================================
+   BASE STYLING
+   ======================================================================= */
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+
+  body {
+    color: hsl(var(--fg));
+    background:
+      radial-gradient(1200px 800px at 10% -10%, hsl(var(--accent) / 0.06), transparent 60%),
+      radial-gradient(900px 600px at 110% 10%, hsl(var(--accent-strong) / 0.06), transparent 60%),
+      linear-gradient(180deg, hsl(var(--bg)) 0%, hsl(var(--bg)) 100%);
+    background-attachment: fixed;
+  }
+
+  /* Smooth theme transitions without layout jank */
+  .theme-transition * {
+    transition:
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease),
+      transform var(--dur) var(--ease),
+      opacity var(--dur) var(--ease);
+  }
+
+  /* Accessible focus rings */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  ::selection {
+    background: hsl(var(--accent) / 0.28);
+    color: hsl(var(--accent-foreground));
+  }
+}
+
+/* =======================================================================
+   GLASS UTILITIES
+   ======================================================================= */
+@layer components {
+  .glass {
+    background: linear-gradient(
+        180deg,
+        hsl(var(--surface) / var(--glass-alpha)),
+        hsl(var(--surface) / calc(var(--glass-alpha) + 0.04))
+      );
+    border: 1px solid hsl(var(--border) / 0.35);
+    border-radius: 18px;
+    box-shadow:
+      0 1px 0 hsl(var(--fg) / 0.04) inset,
+      0 20px 40px -20px hsl(var(--shadow) / 0.6);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+  }
+
+  .glass-strong {
+    background: linear-gradient(
+        180deg,
+        hsl(var(--surface) / var(--glass-strong-alpha)),
+        hsl(var(--surface) / calc(var(--glass-strong-alpha) + 0.06))
+      );
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 20px;
+    box-shadow:
+      0 1px 0 hsl(var(--fg) / 0.06) inset,
+      0 26px 60px -24px hsl(var(--shadow) / 0.8);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+  }
+
+  .elevate {
+    box-shadow:
+      0 1px 0 hsl(var(--fg) / 0.04) inset,
+      0 10px 25px -10px hsl(var(--shadow) / 0.65);
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center font-medium;
+    padding: 0.65rem 1rem;
+    border-radius: 12px;
+    border: 1px solid hsl(var(--border) / 0.45);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--surface) / 0.12),
+      hsl(var(--surface) / 0.18)
+    );
+    color: hsl(var(--fg));
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -12px hsl(var(--shadow) / 0.9); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-accent {
+    background: linear-gradient(180deg, hsl(var(--accent) / 0.92), hsl(var(--accent-strong) / 0.92));
+    color: hsl(var(--accent-foreground));
+    border-color: hsl(var(--accent-strong) / 0.9);
+  }
+  .btn-accent:hover { box-shadow: 0 14px 28px -14px hsl(var(--accent-strong) / 0.9); }
+
+  .input {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid hsl(var(--border) / 0.45);
+    background: hsl(var(--surface) / 0.14);
+    color: hsl(var(--fg));
+    padding: 0.65rem 0.85rem;
+    transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .input::placeholder { color: hsl(var(--muted)); }
+  .input:hover { border-color: hsl(var(--border) / 0.65); }
+  .input:focus { border-color: hsl(var(--accent)); box-shadow: 0 0 0 4px hsl(var(--accent) / 0.18); outline: none; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .35rem .6rem;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 0.4);
+    background: hsl(var(--surface) / 0.12);
+    color: hsl(var(--fg));
+  }
+}
+
+/* =======================================================================
+   ANIMATIONS
+   ======================================================================= */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px) scale(.98); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.animate-in {
+  animation: fadeUp var(--dur) var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition *, .animate-in { transition: none !important; animation: none !important; }
+}
+
+/* =======================================================================
+   SCROLLBARS
+   ======================================================================= */
+/* Global (WebKit) */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--surface) / 0.6);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background-color: hsl(var(--surface) / 0.8); }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Existing specific prompt area (kept from your file) */
+.prompt::-webkit-scrollbar { width: 5px; }
+.prompt::-webkit-scrollbar-thumb { background-color: #666e75; border-radius: 5px; }
+
+/* =======================================================================
+   RESPONSIVE TWEAKS (kept, with no functional change)
+   ======================================================================= */
 @media screen and (min-width: 480px) {
-    .card:nth-child(7n + 1) {
-        grid-column: auto/span 2;
-        grid-row: auto/span 2;
-    }
-}
-
-.prompt::-webkit-scrollbar {
-    width: 5px;
-}
-
-.prompt::-webkit-scrollbar-thumb {
-    background-color: #666e75;
-    border-radius: 5px;
+  .card:nth-child(7n + 1) {
+    grid-column: auto / span 2;
+    grid-row: auto / span 2;
+  }
 }

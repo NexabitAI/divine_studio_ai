@@ -6,11 +6,7 @@ import { FormField, Loader } from '../components';
 
 const CreatePost = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: '',
-    prompt: '',
-    photo: '',
-  });
+  const [form, setForm] = useState({ name: '', prompt: '', photo: '' });
 
   // const post_Url = "imagetotextbackend-production.up.railway.app";
   const post_Url = "https://divinestudio.pro";
@@ -20,79 +16,80 @@ const CreatePost = () => {
   const [imageCount, setImageCount] = useState(0);
 
   useEffect(() => {
-    const count = localStorage.getItem('imageCount');
-    if (count) {
-      setImageCount(parseInt(count, 10));
-    }
+    try {
+      const count = localStorage.getItem('imageCount');
+      if (count) setImageCount(parseInt(count, 10));
+    } catch { /* ignore */ }
   }, []);
 
   const generateImage = async () => {
-    if (form.prompt) {
-      if (imageCount >= 20) {
-        alert('You have reached the limit of 3 images per day. Please contact Hamza to generate more.');
-        return;
-      }
-
-      try {
-        setGeneratingImg(true);
-        const response = await fetch(`${post_Url}/api/v1/imgGenerate`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_STABILITY_AI_TOKEN}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ prompt: form.prompt }),
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
-          const newCount = imageCount + 1;
-          setImageCount(newCount);
-          localStorage.setItem('imageCount', newCount);
-        } else {
-          throw new Error(data.error || 'Something went wrong!');
-        }
-      } catch (error) {
-        alert(error.message);
-      } finally {
-        setGeneratingImg(false);
-      }
-    } else {
+    if (!form.prompt) {
       alert('Please provide a prompt');
+      return;
+    }
+
+    // Respect existing limit logic, keep copy neutral
+    if (imageCount >= 20) {
+      alert('You have reached your daily image limit.');
+      return;
+    }
+
+    try {
+      setGeneratingImg(true);
+      const response = await fetch(`${post_Url}/api/v1/imgGenerate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_STABILITY_AI_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: form.prompt }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
+        const newCount = imageCount + 1;
+        setImageCount(newCount);
+        try { localStorage.setItem('imageCount', String(newCount)); } catch { /* ignore */ }
+      } else {
+        throw new Error(data.error || 'Something went wrong!');
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setGeneratingImg(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.prompt && form.photo) {
-      try {
-        setLoading(true);
-        const response = await fetch(`${post_Url}/api/v1/post`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(form),
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-          navigate('/');
-        } else {
-          throw new Error(result.error || 'Failed to share post');
-        }
-      } catch (error) {
-        alert(error.message);
-      } finally {
-        setLoading(false);
-      }
-    } else {
+    if (!(form.prompt && form.photo)) {
       alert('Please enter a prompt and generate an image');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${post_Url}/api/v1/post`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        navigate('/');
+      } else {
+        throw new Error(result.error || 'Failed to share post');
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSurpriseMe = () => {
     const randomPrompt = getRandomPrompt(form.prompt);
@@ -101,17 +98,19 @@ const CreatePost = () => {
 
   return (
     <section className="max-w-7xl mx-auto">
-      <div className="justify-center text-center">
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-black">
-          Create <mark className="px-2 text-white bg-blue-600 rounded dark:bg-blue-500">AI</mark> Images
+      {/* Hero */}
+      <div className="text-center animate-in">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
+          Create <span className="bg-clip-text text-transparent bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent-strong))]">AI</span> Images
         </h1>
-        <p className="text-lg font-normal text-gray-500 lg:text-xl dark:text-gray-400">
-          Unleash the power of Divine Studio AI model from Hugging Face to turn your wildest ideas into stunning visual creations.
-          Share your imagination with the community and bring your dreams to life!
+        <p className="mt-3 text-base md:text-lg opacity-80">
+          Unleash the power of Divine Studio to turn your wildest ideas into stunning visuals.
+          Share your imagination with the community!
         </p>
       </div>
 
-      <form className="mt-16 max-w-3xl" onSubmit={handleSubmit}>
+      {/* Form */}
+      <form className="mt-12 max-w-3xl glass p-6 md:p-7 rounded-2xl animate-in" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-5">
           <FormField
             labelName="Your Name"
@@ -120,6 +119,7 @@ const CreatePost = () => {
             placeholder="Ex. John Doe"
             value={form.name}
             handleChange={handleChange}
+            className="input"
           />
 
           <FormField
@@ -131,48 +131,60 @@ const CreatePost = () => {
             handleChange={handleChange}
             isSurpriseMe
             handleSurpriseMe={handleSurpriseMe}
+            className="input"
           />
 
-          <div className="relative bg-gradient-to-b from-[#E2E8F0] to-[#F0F4F8] border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-3 h-64 flex justify-center items-center overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg">
+          {/* Preview */}
+          <div
+            className="relative glass-strong border-0 text-sm rounded-xl w-64 h-64 flex justify-center items-center overflow-hidden elevate"
+            aria-live="polite"
+            aria-busy={generatingImg ? 'true' : 'false'}
+          >
             {form.photo ? (
-              <img src={form.photo} alt={form.prompt} className="w-full h-full object-cover rounded-lg" />
+              <img
+                src={form.photo}
+                alt={form.prompt || 'Generated preview'}
+                className="w-full h-full object-cover rounded-xl"
+              />
             ) : (
-              <div className="w-full h-full flex items-center justify-center opacity-40 rounded-lg">
+              <div className="w-full h-full flex items-center justify-center opacity-60 rounded-xl">
                 <img src={preview} alt="preview" className="w-9/12 h-9/12 object-contain" />
               </div>
             )}
 
             {generatingImg && (
-              <div className="absolute inset-0 z-10 flex justify-center items-center bg-[rgba(0,0,0,0.5)] rounded-lg">
+              <div className="absolute inset-0 z-10 flex justify-center items-center bg-black/45 rounded-xl">
                 <Loader />
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-5 flex gap-5">
+        {/* Actions */}
+        <div className="mt-6 flex gap-4">
           <button
             type="button"
             onClick={generateImage}
-            className={`text-white bg-gradient-to-r from-[#4CAF50] to-[#45A249] font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center focus:outline-none transition-all duration-300 ${generatingImg ? 'cursor-not-allowed opacity-70' : 'hover:opacity-90'
-              }`}
+            className={`btn btn-accent ${generatingImg ? 'opacity-70 cursor-not-allowed' : ''}`}
             disabled={generatingImg}
           >
-            {generatingImg ? 'Generating...' : 'Generate'}
+            {generatingImg ? 'Generating…' : 'Generate'}
           </button>
+
+          {form.photo && (
+            <button
+              type="submit"
+              className={`btn ${loading ? 'opacity-70 cursor-progress' : ''}`}
+              disabled={loading}
+            >
+              {loading ? 'Sharing…' : 'Share with the Community'}
+            </button>
+          )}
         </div>
 
-        <div className="mt-10">
-          <p className="mt-2 text-[#666e75] text-[14px]">
-            <strong>Ready to showcase your creation?</strong> Share your imaginative image with the community!
-          </p>
-          <button
-            type="submit"
-            className="mt-4 text-white bg-gradient-to-r from-[#3B82F6] to-[#2563EB] font-medium rounded-md text-sm w-full sm:w-auto px-6 py-3 focus:outline-none transition-all duration-300 hover:opacity-90 transform hover:scale-105"
-            disabled={loading}
-          >
-            {loading ? 'Sharing...' : 'Share with the Community'}
-          </button>
+        {/* Helper */}
+        <div className="mt-6 text-sm opacity-75">
+          Generated today: <span className="font-medium">{imageCount}</span>
         </div>
       </form>
     </section>
