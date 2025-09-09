@@ -68,7 +68,7 @@ const App = () => {
               <img
                 src={logo2}
                 alt="logo"
-                className="w-28 h-28 object-contain drop-shadow-sm"
+                className="w-14 h-14 object-contain drop-shadow-sm"
               />
               <span className="sr-only">AI Image Studio</span>
             </Link>
