@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 
 const router = express.Router();
 
-const HUGGINGFACE_TOKEN = "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";
+const HUGGINGFACE_TOKEN = "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";
 const MODEL_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
 
 router.route("/").get((req, res) => {
